@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Multiple GeoJSON Layers, Dynamic Legend, and City Manager</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet Fullscreen CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.css" />
+    <!-- Leaflet MiniMap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
+    <!-- Open Sans Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap">
+    <style>
+    /* General style settings */
+    body {
+        margin: 0;
+        padding-bottom: 50px;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        font-family: 'Open Sans', sans-serif;
+    }
+    /* Grid layout */
+    .container {
+        display: grid;
+        grid-template-columns: 20% 1fr;
+        grid-template-rows: auto 1fr;
+        gap: 10px;
+        grid-template-areas:
+            "Logo Map"
+            "Side-Bar Map";
+        height: calc(100vh - 40px);
+        width: 100vw;
+        overflow: hidden; /* Taşan içeriği gizle */
+    }
+    /* Logo style */
+    .Logo {
+        grid-area: Logo;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+    .Logo img {
+        max-width: 80%;
+        max-height: 80%;
+    }
+    /* Side-Bar style */
+    .Side-Bar {
+        grid-area: Side-Bar;
+        background-color: white;
+        padding: 25px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        overflow-y: auto;
+    }
+    .Side-Bar h1 {
+        font-weight: bold;
+        font-size: 14pt;
+        margin: 0;
+        text-align:center;
+    }
+    .Side-Bar p {
+        font-size: 10pt;
+        margin: 0;
+        text-align: justify;
+    }
+    /* Map container style */
+    .map-container {
+        grid-area: Map;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow: hidden; /* Taşan içeriği gizle */
+    }
+    .map-container .leaflet-container {
+        height: 100%;
+        width: 100%;
+    }
+    
+    /* Legend style */
+    .legend {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        line-height: 1.5;
+        max-height: calc(100% - 20px);
+        overflow-y: auto;
+    }
+    .legend h4 {
+        margin: 0 0 10px;
+        font-size: 14px;
+    }
+    
+    .geojson-label {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #666;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    font-family: 'Open Sans', sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 1px 4px;
+    white-space: nowrap;
+}
+    
+    /* City manager style */
+    #city-manager {
+        position: absolute;
+        top: 10px;
+        left: 50px;
+        z-index: 1000;
+        background-color: white;
+        padding: 5px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    #city-manager label {
+        font-weight: 600;
+        font-size: 10pt;
+    }
+    #city-manager select {
+        width: 100%;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+        .geojson-label {
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: bold;
+            font-size: 10px;
+            color: red;
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+        }
+
+        /* Media queries */
+    @media (max-width: 768px) {
+        .container {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto 1fr;
+            grid-template-areas:
+                "Logo"
+                "Side-Bar"
+                "Map";
+        }
+        .Logo {
+            justify-content: ;
+            align-items: ;
+            height: 80px;
+        }
+        .Side-Bar {
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+        .map-container {
+            height: calc(70vh - 80px);
+        }
+    }
+    
+    .layer-selector {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .layer-selector button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 5px;
+        margin: 2px 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+    .layer-selector button:hover {
+        background-color: #f0f0f0
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19); 
+        border: 2px solid #9e9e9e;
+    }
+    .layer-info {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #ccc;
+    }
+    /* Popup genişliği için özel bir stil ekleyin */
+    .leaflet-popup-content-wrapper {
+        width: 500px !important; /* Burada genişliği ihtiyacınıza göre ayarlayabilirsiniz */
+        max-height: 300px; /* İhtiyaca göre yüksekliği ayarlayın */
+        max-width: 90vw; /* Ekran boyutuna göre maksimum genişlik */
+        font-size: 12px; /* Font boyutunu da özelleştirebilirsiniz. */
+        text-align: center; /* İçeriği ortalayın */
+    }
+    
+    .leaflet-popup-content {
+        max-height: 270px; /* İhtiyaca göre yüksekliği ayarlayın */
+        width: 470px !important;
+        height: 350px;
+        padding-right: 10px;
+        overflow-y: scroll;
+}
+}
+
+</style>
+</head>
+<body>
+    <svg width="0" height="0">
+    <defs>
+        <pattern id="hatchPattern" width="5" height="10" patternUnits="userSpaceOnUse">
+            <path d="M5,0 L5,10" style="stroke:#242424; stroke-width:1" />
+        </pattern>
+    </defs>
+</svg>
+
+    <div class="container">
+        <!-- Logo Area -->
+        <div class="Logo">
+            <img src="https://upload.wikimedia.org/wikipedia/tr/4/40/Tarihi_Kentler_Birli%C4%9Fi_logo.png" alt="Logo">
+        </div>
+        <!-- Side Panel (Side-Bar) -->
+        <div class="Side-Bar">
+            <h1>Milli Mücadele Haritası</h1>
+            <p>
+                 <br>
+                
+
+Millî Mücadele tarihi, Mustafa Kemal Paşa’nın 16 Mayıs 1919 tarihinde İstanbul’dan Samsun’a yola çıkmasıyla başlayıp 23 Ekim 1922 tarihinde sona eren şanlı bir tarihtir. Mustafa Kemal Paşa ve silah arkadaşlarının, bu milletin özgürlük ve bağımsızlık konusundaki kararlı mücadelesinden aldıkları güçle verdikleri bir ölüm kalım savaşıdır. Tarih sadece dünde kalan bir hikâye değil, bugünü de inşa eden büyük bir kılavuzdur. Ne yazık ki bu şanlı tarihin canlılığı, diriliği, şimdiye ışık tutacak azmi bugün kitap sayfaları arasına sıkışıp kalmış durumda. 
+
+Millî Mücadele kahramanlarının üstün bir akıl ve asil bir ruhla ilmek ilmek inşa ettiği örgütlenme her bir istasyonu, mekânı, ardındaki dramıyla bugün yeniden canlandırmamız gereken ruha ve birliğe ışık olacaktır. 
+
+Tarihi Kentler Birliği çatısı altında tarihte örneği nadir görülen nitelikteki bu uzun ve destansı mücadeleyi kaybolmaya yüz tutmuş anlatısıyla birlikte tespit ederek sizlere sunuyoruz. 
+
+Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yıl boyunca izlenilen rotayı takip ediyor. Gençlerimiz tarihî kentlerimizin ruhunu bu rotayla yaşatacaktır.
+
+
+
+                <br>
+            </p>
+        </div>
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+            <!-- City Manager -->
+            <div id="city-manager">
+                <label for="cities">Şehirler:</label>
+                <select id="cities">
+                    <!-- "Şehir seçiniz" option will be shown by default -->
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.label.collision@0.2.3/leaflet.label.collision.js"></script>
+    <!-- Turf JS -->
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet MiniMap JS -->
+    <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
+    <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
+    <script>
+        // Map center and initial zoom level
+        var centerCoordinates = [39.79273915299965, 36.01606133613108];
+        var zoomLevel = 6;
+        var minZoomLevel = 4;
+
+        // Map bounds (Turkey)
+        var southWest = L.latLng(28.0, 5.0);
+        var northEast = L.latLng(47.0, 60.0);
+        var bounds = L.latLngBounds(southWest, northEast);
+
+        // Create the map
+        var map = L.map('map', {
+            center: centerCoordinates,
+            zoom: zoomLevel,
+            minZoom: minZoomLevel,
+            layers: [],
+            maxBounds: bounds,
+            maxBoundsViscosity: 1.0
+        });
+
+        // Base layer (mevcut kod)
+        var baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://carto.com/">Carto</a>',
+            noWrap: true
+        }).addTo(map);
+        
+        // Yeni uydu görüntüsü katmanı
+        var satelliteLayer = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a>'
+        });
+        
+
+        // GeoJSON Layers
+        var geoJSONLayers = {};
+
+        // Function to load GeoJSON layers with formatted popups
+    function loadGeoJSONLayer(name, url, style, labelProperty, useHatchPattern = false, zIndex = 0, enablePopup = false, popupContent = '') {
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+        let layer = L.geoJSON(data, {
+            pointToLayer: function (feature, latlng) {
+                if (feature.geometry.type === 'Point') {
+                    return L.circleMarker(latlng, {
+                        radius: 8,
+                        fillColor: style.fillColor,
+                        color: style.color,
+                        weight: style.weight,
+                        opacity: style.opacity,
+                        fillOpacity: style.fillOpacity
+                    });
+                }
+            },
+            style: function (feature) {
+                let appliedStyle = { ...style };
+
+                if (useHatchPattern && feature.geometry.type !== 'Point') {
+                    appliedStyle.fillColor = 'url(#hatchPattern)';
+                    appliedStyle.fillOpacity = 1;
+                }
+
+                return appliedStyle;
+            },
+            onEachFeature: function (feature, layer) {
+                if (feature.properties && feature.properties[labelProperty]) {
+                    let labelPoint;
+
+                    if (feature.geometry.type === 'MultiPolygon') {
+                        let largestPolygon = feature.geometry.coordinates.reduce((largest, polygon) => {
+                            let area = turf.area(turf.polygon(polygon));
+                            return area > largest.area ? { polygon, area } : largest;
+                        }, { polygon: null, area: 0 }).polygon;
+
+                        labelPoint = turf.centroid(turf.polygon(largestPolygon));
+                    } else if (feature.geometry.type === 'Point') {
+                        labelPoint = feature;
+                    } else {
+                        labelPoint = turf.centroid(feature);
+                    }
+
+                    L.marker(
+                        [labelPoint.geometry.coordinates[1], labelPoint.geometry.coordinates[0]],
+                        {
+                            icon: L.divIcon({
+                                className: 'geojson-label',
+                                html: feature.properties[labelProperty],
+                                iconSize: [100, 20],
+                                iconAnchor: [50, 25]
+                            }),
+                            interactive: false
+                        }
+                    ).addTo(map);
+                }
+
+                // Popup içeriği ekleme kodu burada kalabilir...
+            }
+        });
+
+        layer.setZIndex(zIndex);
+        geoJSONLayers[name] = layer;
+        geoJSONLayers[name].options.enablePopup = enablePopup;
+        geoJSONLayers[name].options.popupContent = popupContent;
+        updateLayerControl();
+        layer.addTo(map);
+        
+        // Label çakışmalarını önlemek için Leaflet.Label.Collision'ı kullan
+        L.LayerGroup.collision({
+        collisionFlg: true,
+        margin: 20
+        }).addTo(map);
+    });
+}
+
+        // Load GeoJSON layers (replace with your GitHub URLs)
+        
+        var ilSinirlari = loadGeoJSONLayer("İl", "https://raw.githubusercontent.com/mihracnar/Leaflet-Map-with-Multiple-Geojson-Layers-Dynamic-Legend-and-City-Manage-Public/20a3b9cb197fff03168d23ca989fb9cb706700f1/Geojson/Milli-Mucadele/il_sinirlari.geojson", {
+        color: 'red', // Dış sınır rengi
+        weight: 1, // Sınır kalınlığı
+        dashArray: '', // Kısa çizgiler
+        opacity: 1,
+        fillColor: 'transparent', // İç renk, 'transparent' olarak ayarlandı
+        fillOpacity: 0 // İç opaklık, görünmemesi için 0
+        }, '-', false, 9999, false);
+        
+        
+        var uyeIlce = loadGeoJSONLayer("İlçe", "https://raw.githubusercontent.com/mihracnar/Leaflet-Map-with-Multiple-Geojson-Layers-Dynamic-Legend-and-City-Manage-Public/20a3b9cb197fff03168d23ca989fb9cb706700f1/Geojson/Milli-Mucadele/ilce_sinirlari.geojson", {
+        color: 'white', // Dış sınır rengi
+        weight: 2.5, // Sınır kalınlığı
+        dashArray: '', // Kısa çizgiler
+        opacity: 0.45,
+        fillColor: '#07b86d', // İç renk, 'transparent' olarak ayarlandı
+        fillOpacity: 0.30, // İç opaklık, görünmemesi için 0
+        }, '-', false, 0, true, "<h2>{County}</h2><strong>Belediye Türü:</strong> İlçe <br>    <strong>Doğal Sit Alanı S.:</strong>{DOĞAL SİT}<br>    <strong>Arkeolojik Sit Alanı S.:</strong>{ARKEOLOJİK SİT}<br>  <strong>Tarihi Sit Alanı S.:</strong>{TARİHİ SİT}<br>  <strong>Kentsel Sit Alanı S.:</strong>{KENTSEL SİT}<br> <strong>Toplam Korunması Gerekli Taşınmaz Kültür Varlığı S.:</strong>{Toplam Korunması Gerekli \nTaşınmaz Kültür Varlığı}");
+        
+        var rota = loadGeoJSONLayer("Rota", "https://raw.githubusercontent.com/mihracnar/Leaflet-Map-with-Multiple-Geojson-Layers-Dynamic-Legend-and-City-Manage-Public/5634a9f8b9995dcbd043ede0918913e2f2f1f316/Geojson/Milli-Mucadele/Rota.geojson", {
+        color: 'white', // Dış sınır rengi
+        weight: 0.5, // Sınır kalınlığı
+        dashArray: '', // Kısa çizgiler
+        opacity: 0.45,
+        fillColor: '#0318ea', // İç renk, 'transparent' olarak ayarlandı
+        fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
+        }, '-', false, 0, false, "<h2>{County}</h2><strong>Belediye Türü:</strong> İlçe <br>    <strong>Doğal Sit Alanı S.:</strong>{DOĞAL SİT}<br>    <strong>Arkeolojik Sit Alanı S.:</strong>{ARKEOLOJİK SİT}<br>  <strong>Tarihi Sit Alanı S.:</strong>{TARİHİ SİT}<br>  <strong>Kentsel Sit Alanı S.:</strong>{KENTSEL SİT}<br> <strong>Toplam Korunması Gerekli Taşınmaz Kültür Varlığı S.:</strong>{Toplam Korunması Gerekli \nTaşınmaz Kültür Varlığı}");
+
+        var milliMucadele = loadGeoJSONLayer("Milli Mücadele Konumu", "https://raw.githubusercontent.com/mihracnar/Leaflet-Map-with-Multiple-Geojson-Layers-Dynamic-Legend-and-City-Manage-Public/20a3b9cb197fff03168d23ca989fb9cb706700f1/Geojson/Milli-Mucadele/milli_mucadele.geojson", {
+        color: '#ffffff', // Dış sınır rengi
+        radius: 10,
+        weight: 2, // Sınır kalınlığı
+        opacity: 0.9,
+        fillColor: '#c90f02',
+        fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
+        }, 'Tarih', false, 1, true, "<h2>{Mekan}</h2> <p>{Açıklama}</p> <img src='{Görsel Kaynağı(Kitap/Link)}' style='max-width:100%;height:auto;'> <br>");
+
+        // Add more layers as needed
+
+    var layerProperties = {
+    "İl": "il_adi",
+    "İlçe": "County",
+    "Milli Mücadele Konumu": "Tarih"
+};
+
+        // Katman seçici popup ve katman bilgilerini göstermek için olay dinleyicisi
+        map.on('click', function(e) {
+        var layers = [];
+        var clickPoint = [e.latlng.lng, e.latlng.lat];
+        var pixelPoint = map.latLngToContainerPoint(e.latlng);
+    
+        map.eachLayer(function(layer) {
+            if (layer instanceof L.GeoJSON) {
+                layer.eachLayer(function(feature) {
+                    if (feature.feature && feature.feature.geometry) {
+                        var isInside = false;
+    
+                        if (feature.feature.geometry.type === 'Polygon' || feature.feature.geometry.type === 'MultiPolygon') {
+                            isInside = turf.booleanPointInPolygon(turf.point(clickPoint), feature.feature);
+                        } else if (feature.feature.geometry.type === 'Point') {
+                            var featureLatLng = L.latLng(feature.feature.geometry.coordinates[1], feature.feature.geometry.coordinates[0]);
+                            var featurePixelPoint = map.latLngToContainerPoint(featureLatLng);
+                            var distance = pixelPoint.distanceTo(featurePixelPoint);
+                            isInside = distance <= 5;
+                        }
+    
+                        if (isInside) {
+                            var layerName = getLayerName(layer);
+                            var layerData = geoJSONLayers[layerName];
+                            if (layerData && layerData.options.enablePopup) {
+                                var propertyName = layerProperties[layerName];
+                                var displayName = propertyName ? feature.feature.properties[propertyName] : layerName;
+                                layers.push({
+                                    name: layerName,
+                                    displayName: displayName,
+                                    feature: feature.feature,
+                                    popupContent: layerData.options.popupContent
+                                });
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    
+        if (layers.length > 0) {
+            var popupContent = '<div class="layer-selector">';
+            popupContent += '<h3>Katmanlar:</h3>';
+            layers.forEach(function(layer, index) {
+                popupContent += '<button onclick="showLayerInfo(' + index + ')">' + layer.displayName + '</button>';
+            });
+            popupContent += '</div>';
+            popupContent += '<div id="layer-info" class="layer-info"></div>';
+    
+            var popup = L.popup()
+                .setLatLng(e.latlng)
+                .setContent(popupContent)
+                .openOn(map);
+    
+            window.popupLayers = layers;
+        }
+    });
+        
+        // Seçilen katman hakkında bilgi gösteren işlev
+        function showLayerInfo(index) {
+            var layer = window.popupLayers[index];
+            var infoContent = '<h4>' + layer.displayName + '</h4>';
+        
+            // Popup içeriğini formatla
+            var popupContentFormatted = layer.popupContent;
+            for (var prop in layer.feature.properties) {
+                var placeholder = `{${prop}}`;
+                var value = layer.feature.properties[prop];
+                
+                // Eğer özellik bir görsel URL'si ise, img etiketine dönüştür
+                if (prop === 'Görsel' && value) {
+                    value = `<img src="${value}" style="max-width:100%;height:auto;">`;
+                }
+                
+                popupContentFormatted = popupContentFormatted.replace(new RegExp(placeholder, 'g'), value);
+            }
+        
+            // Temel formatlama uygula
+            popupContentFormatted = popupContentFormatted
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/#{1,3}(.*?)\n/g, (match, p1) => {
+                    var level = match.split('#').length - 1;
+                    return `<h${level}>${p1.trim()}</h${level}>`;
+                })
+                .replace(/\[\[(.*?)\]\]/g, '<a href="$1">$1</a>')
+                .replace(/\[\[(.*?)\|(.*?)\]\]/g, '<a href="$1">$2</a>')
+                .replace(/\{\{(.*?)\}\}/g, '<img src="$1" alt="Resim">');
+        
+            document.getElementById('layer-info').innerHTML = infoContent + popupContentFormatted;
+        }
+
+
+        // Layer Control
+        var baseMaps = {
+            "Carto Light All": baseLayer,
+            "Uydu Görüntüsü": satelliteLayer
+        };
+        var overlayMaps = {};
+
+        function updateLayerControl() {
+            if (map.layerControl) {
+                map.removeControl(map.layerControl);
+            }
+            for (var key in geoJSONLayers) {
+                if (geoJSONLayers[key]) {
+                    overlayMaps[key] = geoJSONLayers[key];
+                }
+            }
+            map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: false}).addTo(map);
+        }
+
+        // Legend control
+        var legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = '<h4>Lejant</h4>';
+            return div;
+        };
+
+        legend.addTo(map);
+
+        function updateLegend() {
+    var legendDiv = document.querySelector('.legend');
+    legendDiv.innerHTML = '<h4>Lejant</h4>';
+    map.eachLayer(function(layer) {
+    console.log(layer.options.zIndex); // Z-Index değerlerini kontrol eder
+
+    if (layer instanceof L.GeoJSON) {
+        var layerName = getLayerName(layer);
+        if (layerName) {
+            var style = layer.options.style;
+            var color = typeof style === 'function' ? style().color : style.color;
+            var fillColor = typeof style === 'function' ? style().fillColor : style.fillColor;
+            var weight = typeof style === 'function' ? style().weight : style.weight;
+            var dashArray = typeof style === 'function' ? style().dashArray : style.dashArray;
+            var fillOpacity = typeof style === 'function' ? style().fillOpacity : style.fillOpacity;
+
+            var legendItem = document.createElement('div');
+            legendItem.style.marginBottom = '5px';
+
+            if (fillColor && fillOpacity !== undefined) {
+                legendItem.innerHTML = `
+                    <svg width="20" height="20" style="vertical-align: middle;">
+                        <rect width="20" height="20" fill="${fillColor}" stroke="${color}" stroke-width="${weight}" stroke-dasharray="${dashArray}" fill-opacity="${fillOpacity}"/>
+                    </svg>
+                    <span style="margin-left: 5px;">${layerName}</span>
+                `;
+            } else if (weight > 0 && fillColor === 'transparent') {
+                legendItem.innerHTML = `
+                    <svg width="20" height="20" style="vertical-align: middle;">
+                        <rect width="20" height="20" fill="none" stroke="${color}" stroke-width="${weight}" stroke-dasharray="${dashArray}"/>
+                    </svg>
+                    <span style="margin-left: 5px;">${layerName}</span>
+                `;
+            } else if (fillColor === 'transparent' && weight === 0) {
+                legendItem.innerHTML = `
+                    <svg width="20" height="20" style="vertical-align: middle;">
+                        <rect width="20" height="20" fill="${fillColor}" fill-opacity="${fillOpacity}"/>
+                    </svg>
+                    <span style="margin-left: 5px;">${layerName}</span>
+                `;
+            }
+
+            legendDiv.appendChild(legendItem);
+        }
+    }
+});
+
+}
+
+        function getLayerName(layer) {
+            for (var name in geoJSONLayers) {
+                if (geoJSONLayers[name] === layer) {
+                    return name;
+                }
+            }
+            return null;
+        }
+
+        map.on('overlayadd', function() {
+            updateLegend();
+        });
+
+        map.on('overlayremove', function() {
+            updateLegend();
+        });
+
+        // Mini Map
+        var miniMapLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://carto.com/">Carto</a>'
+        });
+
+        new L.Control.MiniMap(miniMapLayer, {
+            toggleDisplay: true,
+            minimized: false,
+            position: 'bottomleft'
+        }).addTo(map);
+
+        // Cities (Bookmark) Manager
+        var cities = {
+            "Şehir seçiniz": {center: centerCoordinates, zoom: zoomLevel},
+            "İstanbul": {center: [41.1150, 29.0726], zoom: 9},
+            "Ankara": {center: [39.9334, 32.8597], zoom: 8},
+            "İzmir": {center: [38.4192, 27.1287], zoom: 8},
+            "Antalya": {center: [36.8841, 30.7056], zoom: 8},
+            "Adana": {center: [37.0017, 35.3289], zoom: 8}
+        };
+
+        var citySelect = document.getElementById('cities');
+
+        var defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "Şehir seçiniz";
+        defaultOption.selected = true;
+        citySelect.appendChild(defaultOption);
+
+        Object.keys(cities).forEach(function(name) {
+            if (name !== "Şehir seçiniz") {
+                var option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                citySelect.appendChild(option);
+            }
+        });
+
+        citySelect.addEventListener('change', function() {
+            var selectedCity = citySelect.value;
+            var city = cities[selectedCity];
+            if (city) {
+                map.setView(city.center, city.zoom);
+            }
+        });
+
+        // Create the fullscreen control
+        var fullscreenControl = L.control.fullscreen({
+            position: 'topleft', // this is the position in the corner the control will be shown
+            title: 'Tam ekran modu', // this is the tooltip that will display on hover
+            titleCancel: 'Tam ekran modundan çık', // this is the tooltip that will display on hover when fullscreen is active
+            forceSeparateButton: true, // this forces separate button instead of combining it with zoom buttons
+            forcePseudoFullscreen: true, // if true, fullscreen to page width and height
+            fullscreenElement: false // Dom element to render in full screen, false by default (body)
+        });
+        
+        // Add the fullscreen control to the map
+        map.addControl(fullscreenControl);
+    </script>
+</body>
+</html>
