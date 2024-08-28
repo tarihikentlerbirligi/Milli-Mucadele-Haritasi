@@ -418,13 +418,13 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
         }, '-', false, 0, false, "<h2>{County}</h2><strong>Belediye Türü:</strong> İlçe <br>    <strong>Doğal Sit Alanı S.:</strong>{DOĞAL SİT}<br>    <strong>Arkeolojik Sit Alanı S.:</strong>{ARKEOLOJİK SİT}<br>  <strong>Tarihi Sit Alanı S.:</strong>{TARİHİ SİT}<br>  <strong>Kentsel Sit Alanı S.:</strong>{KENTSEL SİT}<br> <strong>Toplam Korunması Gerekli Taşınmaz Kültür Varlığı S.:</strong>{Toplam Korunması Gerekli \nTaşınmaz Kültür Varlığı}");
 
         var milliMucadele = loadGeoJSONLayer("Milli Mücadele Konumu", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024.geojson", {
-        color: '#ffffff', // Dış sınır rengi
-        radius: 10,
-        weight: 2, // Sınır kalınlığı
-        opacity: 0.9,
-        fillColor: '#c90f02',
-        fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
-        }, '-', false, 1, true, "<h2>{Mekan}</h2> <p>{Açıklama}</p> <img src='https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Gorseller/20.12.1919.png' style='max-width:100%;height:auto;'> <br>");
+            color: '#ffffff', // Dış sınır rengi
+            radius: 10,
+            weight: 2, // Sınır kalınlığı
+            opacity: 0.9,
+            fillColor: '#c90f02',
+            fillOpacity: 0.75, // İç opaklık
+        }, 'Tarih', false, 1, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
 
         // Add more layers as needed
 
@@ -493,38 +493,38 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
     });
         
         // Seçilen katman hakkında bilgi gösteren işlev
-        function showLayerInfo(index) {
-            var layer = window.popupLayers[index];
-            var infoContent = '<h4>' + layer.displayName + '</h4>';
+function showLayerInfo(index) {
+    var layer = window.popupLayers[index];
+    var infoContent = '<h4>' + layer.displayName + '</h4>';
+
+    // Popup içeriğini formatla
+    var popupContentFormatted = layer.popupContent;
+    for (var prop in layer.feature.properties) {
+        var placeholder = `{${prop}}`;
+        var value = layer.feature.properties[prop];
         
-            // Popup içeriğini formatla
-            var popupContentFormatted = layer.popupContent;
-            for (var prop in layer.feature.properties) {
-                var placeholder = `{${prop}}`;
-                var value = layer.feature.properties[prop];
-                
-                // Eğer özellik bir görsel URL'si ise, img etiketine dönüştür
-                if (prop === 'Görsel' && value) {
-                    value = `<img src="${value}" style="max-width:100%;height:auto;">`;
-                }
-                
-                popupContentFormatted = popupContentFormatted.replace(new RegExp(placeholder, 'g'), value);
-            }
-        
-            // Temel formatlama uygula
-            popupContentFormatted = popupContentFormatted
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/#{1,3}(.*?)\n/g, (match, p1) => {
-                    var level = match.split('#').length - 1;
-                    return `<h${level}>${p1.trim()}</h${level}>`;
-                })
-                .replace(/\[\[(.*?)\]\]/g, '<a href="$1">$1</a>')
-                .replace(/\[\[(.*?)\|(.*?)\]\]/g, '<a href="$1">$2</a>')
-                .replace(/\{\{(.*?)\}\}/g, '<img src="$1" alt="Resim">');
-        
-            document.getElementById('layer-info').innerHTML = infoContent + popupContentFormatted;
+        // Eğer özellik bir görsel URL'si ise, img etiketine dönüştür
+        if (prop === 'Görsel' && value) {
+            value = `<img src="${value}" style="max-width:100%;height:auto;">`;
         }
+        
+        popupContentFormatted = popupContentFormatted.replace(new RegExp(placeholder, 'g'), value);
+    }
+
+    // Temel formatlama uygula
+    popupContentFormatted = popupContentFormatted
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/#{1,3}(.*?)\n/g, (match, p1) => {
+            var level = match.split('#').length - 1;
+            return `<h${level}>${p1.trim()}</h${level}>`;
+        })
+        .replace(/\[\[(.*?)\]\]/g, '<a href="$1">$1</a>')
+        .replace(/\[\[(.*?)\|(.*?)\]\]/g, '<a href="$1">$2</a>')
+        .replace(/\{\{(.*?)\}\}/g, '<img src="$1" alt="Resim">');
+
+    document.getElementById('layer-info').innerHTML = infoContent + popupContentFormatted;
+}
 
 
         // Layer Control
