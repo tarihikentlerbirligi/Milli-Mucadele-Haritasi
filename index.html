@@ -426,6 +426,23 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
             fillOpacity: 0.75, // İç opaklık
         }, 'Tarih', false, 1, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
 
+        var milliMucadeleAnlatim = loadGeoJSONLayer("Milli Mücadele Tarihi - Genel Anlatım (Konumu Belli Olmayan Sözlü Tarih)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-0.geojson", {
+            color: '#ffffff', // Dış sınır rengi
+            radius: 10,
+            weight: 2, // Sınır kalınlığı
+            opacity: 0.9,
+            fillColor: '#828282',
+            fillOpacity: 0.75, // İç opaklık
+        }, 'Tarih', false, 1, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
+
+        var milliMucadeleGezi = loadGeoJSONLayer("Tarih Gezi Rotası Önerisi (Tarih Gezi Rotası Öneri Sayısı Artacak)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-2.geojson", {
+            color: '#ffffff', // Dış sınır rengi
+            radius: 10,
+            weight: 2, // Sınır kalınlığı
+            opacity: 0.9,
+            fillColor: '#df8e00',
+            fillOpacity: 0.75, // İç opaklık
+        }, 'Tarih', false, 1, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
         // Add more layers as needed
 
     var layerProperties = {
