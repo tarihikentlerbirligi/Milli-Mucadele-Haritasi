@@ -408,14 +408,14 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
         fillOpacity: 0.30, // İç opaklık, görünmemesi için 0
         }, '', false, 0, false, "<h2>{County}</h2><strong>Belediye Türü:</strong> İlçe <br>    <strong>Doğal Sit Alanı S.:</strong>{DOĞAL SİT}<br>    <strong>Arkeolojik Sit Alanı S.:</strong>{ARKEOLOJİK SİT}<br>  <strong>Tarihi Sit Alanı S.:</strong>{TARİHİ SİT}<br>  <strong>Kentsel Sit Alanı S.:</strong>{KENTSEL SİT}<br> <strong>Toplam Korunması Gerekli Taşınmaz Kültür Varlığı S.:</strong>{Toplam Korunması Gerekli \nTaşınmaz Kültür Varlığı}");
         
-        var rota = loadGeoJSONLayer("Rota", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/6d9847795f7c08fae02675820fb329860057514f/Geojson/Rota_28082024.geojson", {
+        var akis = loadGeoJSONLayer("Kronolojik Akış", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/6d9847795f7c08fae02675820fb329860057514f/Geojson/Rota_28082024.geojson", {
         color: 'white', // Dış sınır rengi
         weight: 0.5, // Sınır kalınlığı
         dashArray: '', // Kısa çizgiler
         opacity: 0.45,
         fillColor: '#0318ea', // İç renk, 'transparent' olarak ayarlandı
         fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
-        }, '-', false, 0, false, "<h2>{County}</h2><strong>Belediye Türü:</strong> İlçe <br>    <strong>Doğal Sit Alanı S.:</strong>{DOĞAL SİT}<br>    <strong>Arkeolojik Sit Alanı S.:</strong>{ARKEOLOJİK SİT}<br>  <strong>Tarihi Sit Alanı S.:</strong>{TARİHİ SİT}<br>  <strong>Kentsel Sit Alanı S.:</strong>{KENTSEL SİT}<br> <strong>Toplam Korunması Gerekli Taşınmaz Kültür Varlığı S.:</strong>{Toplam Korunması Gerekli \nTaşınmaz Kültür Varlığı}");
+        }, '-', false, 0, false, "");
 
         var milliMucadele = loadGeoJSONLayer("Milli Mücadele Konumu", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024.geojson", {
             color: '#ffffff', // Dış sınır rengi
