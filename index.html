@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milli Mücadele Haritası</title>
+    <title>Milli Mücadele Rotası</title>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <!-- Leaflet Fullscreen CSS -->
@@ -203,6 +203,14 @@
         text-align: left; /* İçeriği ortalayın */
     }
     
+.leaflet-popup-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px 0;
+}
+
+    
     .leaflet-popup-content {
         max-height: 330px; /* İhtiyaca göre yüksekliği ayarlayın */
         width: 470px !important;
@@ -210,6 +218,7 @@
         padding-right: 10px;
         overflow-y: scroll;
 }
+    
 }
 
 </style>
@@ -230,7 +239,7 @@
         </div>
         <!-- Side Panel (Side-Bar) -->
         <div class="Side-Bar">
-            <h1>Milli Mücadele Haritası</h1>
+            <h1>Milli Mücadele Rotası</h1>
             <p>
                  <br>
                 
@@ -260,16 +269,16 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
             </div>
         </div>
     </div>
-
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.label.collision@0.2.3/leaflet.label.collision.js"></script>
     <!-- Turf JS -->
     <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- Leaflet MiniMap JS -->
     <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
     <script src="https://unpkg.com/leaflet.fullscreen@1.6.0/Control.FullScreen.js"></script>
+    <script src="https://unpkg.com/leaflet.label.collision@0.2.3/leaflet.label.collision.js"></script>
+    
     <script>
         // Map center and initial zoom level
         var centerCoordinates = [39.79273915299965, 36.01606133613108];
@@ -309,32 +318,31 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
         // GeoJSON Layers
         var geoJSONLayers = {};
 
+
         // Function to load GeoJSON layers with formatted popups
-    function loadGeoJSONLayer(name, url, style, labelProperty, useHatchPattern = false, zIndex = 0, enablePopup = false, popupContent = '') {
-    fetch(url)
-    .then(response => response.json())
-    .then(data => {
-        let layer = L.geoJSON(data, {
-            pointToLayer: function (feature, latlng) {
-                if (feature.geometry.type === 'Point') {
-                    return L.circleMarker(latlng, {
-                        radius: 8,
-                        fillColor: style.fillColor,
-                        color: style.color,
-                        weight: style.weight,
-                        opacity: style.opacity,
-                        fillOpacity: style.fillOpacity
-                    });
-                }
+        function loadGeoJSONLayer(group, name, url, style, labelProperty, useHatchPattern = false, zIndex = 0, enablePopup = false, popupContent = '') {
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            let layer = L.geoJSON(data, {
+                pointToLayer: function (feature, latlng) {
+                    if (feature.geometry.type === 'Point') {
+                        return L.circleMarker(latlng, {
+                            radius: 8,
+                            fillColor: style.fillColor,
+                            color: style.color,
+                            weight: style.weight,
+                            opacity: style.opacity,
+                            fillOpacity: style.fillOpacity
+                        });
+                    }
             },
             style: function (feature) {
                 let appliedStyle = { ...style };
-
                 if (useHatchPattern && feature.geometry.type !== 'Point') {
                     appliedStyle.fillColor = 'url(#hatchPattern)';
                     appliedStyle.fillOpacity = 1;
                 }
-
                 return appliedStyle;
             },
             onEachFeature: function (feature, layer) {
@@ -369,154 +377,153 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
                 }
 
                 // Popup içeriği ekleme kodu burada kalabilir...
-            }
+ }
         });
 
         layer.setZIndex(zIndex);
-        geoJSONLayers[name] = layer;
-        geoJSONLayers[name].options.enablePopup = enablePopup;
-        geoJSONLayers[name].options.popupContent = popupContent;
+        if (!geoJSONLayers[group]) {
+            geoJSONLayers[group] = {};
+        }
+        geoJSONLayers[group][name] = layer;
+        geoJSONLayers[group][name].options.enablePopup = enablePopup;
+        geoJSONLayers[group][name].options.popupContent = popupContent;
         updateLayerControl();
-        layer.addTo(map);
-        
-        // Label çakışmalarını önlemek için Leaflet.Label.Collision'ı kullan
-        L.LayerGroup.collision({
-        collisionFlg: true,
-        margin: 20
-        }).addTo(map);
     });
 }
 
         // Load GeoJSON layers (replace with your GitHub URLs)
         
-        var ilSinirlari = loadGeoJSONLayer("İl", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/d20347832468c92d4709d127f536221c4c651845/Geojson/il_sinrlari_28082024.geojson", {
+        var ilSinirlari = loadGeoJSONLayer("İdari Sınırlar", "İl", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/d20347832468c92d4709d127f536221c4c651845/Geojson/il_sinrlari_28082024.geojson", {
         color: 'red', // Dış sınır rengi
         weight: 1, // Sınır kalınlığı
         dashArray: '', // Kısa çizgiler
         opacity: 1,
         fillColor: 'transparent', // İç renk, 'transparent' olarak ayarlandı
         fillOpacity: 0 // İç opaklık, görünmemesi için 0
-        }, '-', false, 9999, false);
+        }, '-', false, 500, false);
         
         
-        var uyeIlce = loadGeoJSONLayer("İlçe", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/d20347832468c92d4709d127f536221c4c651845/Geojson/ilce_sinirlari_28082024.geojson", {
+        var uyeIlce = loadGeoJSONLayer("İdari Sınırlar", "İlçe", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/d20347832468c92d4709d127f536221c4c651845/Geojson/ilce_sinirlari_28082024.geojson", {
         color: 'white', // Dış sınır rengi
         weight: 2.5, // Sınır kalınlığı
         dashArray: '', // Kısa çizgiler
         opacity: 0.45,
         fillColor: '#07b86d', // İç renk, 'transparent' olarak ayarlandı
         fillOpacity: 0.30, // İç opaklık, görünmemesi için 0
-        }, '', false, 0, false, "<h2>{County}</h2><strong>Belediye Türü:</strong> İlçe <br>    <strong>Doğal Sit Alanı S.:</strong>{DOĞAL SİT}<br>    <strong>Arkeolojik Sit Alanı S.:</strong>{ARKEOLOJİK SİT}<br>  <strong>Tarihi Sit Alanı S.:</strong>{TARİHİ SİT}<br>  <strong>Kentsel Sit Alanı S.:</strong>{KENTSEL SİT}<br> <strong>Toplam Korunması Gerekli Taşınmaz Kültür Varlığı S.:</strong>{Toplam Korunması Gerekli \nTaşınmaz Kültür Varlığı}");
+        }, '', false, 100, false, "<h2>{County}</h2><strong>Belediye Türü:</strong> İlçe <br>    <strong>Doğal Sit Alanı S.:</strong>{DOĞAL SİT}<br>    <strong>Arkeolojik Sit Alanı S.:</strong>{ARKEOLOJİK SİT}<br>  <strong>Tarihi Sit Alanı S.:</strong>{TARİHİ SİT}<br>  <strong>Kentsel Sit Alanı S.:</strong>{KENTSEL SİT}<br> <strong>Toplam Korunması Gerekli Taşınmaz Kültür Varlığı S.:</strong>{Toplam Korunması Gerekli \nTaşınmaz Kültür Varlığı}");
         
-        var akis = loadGeoJSONLayer("Kronolojik Akış", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/6d9847795f7c08fae02675820fb329860057514f/Geojson/Rota_28082024.geojson", {
+        var akis = loadGeoJSONLayer("Kronolojik Akış", "Kronolojik Akış", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/6d9847795f7c08fae02675820fb329860057514f/Geojson/Rota_28082024.geojson", {
         color: 'white', // Dış sınır rengi
         weight: 0.5, // Sınır kalınlığı
         dashArray: '', // Kısa çizgiler
         opacity: 0.45,
         fillColor: '#0318ea', // İç renk, 'transparent' olarak ayarlandı
         fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
-        }, '-', false, 0, false, "");
+        }, '-', false, 400, false, "");
 
-        var rotabir = loadGeoJSONLayer("Tarih Gezi Rotası Önerisi 1", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/Rota%201_4326_2.geojson", {
+        var rotabir = loadGeoJSONLayer("Haymana - Polatlı Rotası","Tarih Gezi Rotası Önerisi 1", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/Rota%201_4326_2.geojson", {
         color: 'white', // Dış sınır rengi
         weight: 0.5, // Sınır kalınlığı
         dashArray: '', // Kısa çizgiler
         opacity: 0.45,
         fillColor: '#ab6000', // İç renk, 'transparent' olarak ayarlandı
         fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
-        }, '-', false, 0, false, "");
+        }, '-', false, 50, false, "");
 
-        var milliMucadele = loadGeoJSONLayer("Milli Mücadele Tarihi - Mekanlar", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/e3054f5baa15a40084f15d8c52a2bbc79520b670/Geojson/milli_mucadele_28082024_v1-1.geojson", {
+        var milliMucadele = loadGeoJSONLayer("Milli Mücadele Tarihi", "Milli Mücadele Tarihi - Mekanlar", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/e3054f5baa15a40084f15d8c52a2bbc79520b670/Geojson/milli_mucadele_28082024_v1-1.geojson", {
             color: '#ffffff', // Dış sınır rengi
             radius: 10,
             weight: 2, // Sınır kalınlığı
             opacity: 0.9,
             fillColor: '#c90f02',
             fillOpacity: 0.75, // İç opaklık
-        }, '', false, 1, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
+        }, '', false, 101, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
 
-        var milliMucadeleAnlatim = loadGeoJSONLayer("Milli Mücadele Tarihi - Genel Anlatım (Konumu Belli Olmayan Sözlü Tarih)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-0.geojson", {
+        var milliMucadeleAnlatim = loadGeoJSONLayer("Milli Mücadele Tarihi", "Milli Mücadele Tarihi - Genel Anlatım (Konumu Belli Olmayan Sözlü Tarih)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-0.geojson", {
             color: '#ffffff', // Dış sınır rengi
             radius: 10,
             weight: 2, // Sınır kalınlığı
             opacity: 0.9,
             fillColor: '#828282',
             fillOpacity: 0.75, // İç opaklık
-        }, '', false, 1, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
+        }, '', false, 100, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
 
-        var milliMucadeleGezi = loadGeoJSONLayer("Tarih Gezi Rotası Önerisi (Tarih Gezi Rotası Öneri Sayısı Artacak)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-2.geojson", {
+        var milliMucadeleGezi = loadGeoJSONLayer("Haymana - Polatlı Rotası", "Tarih Gezi Rotası Önerisi (Tarih Gezi Rotası Öneri Sayısı Artacak)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-2.geojson", {
             color: '#ffffff', // Dış sınır rengi
             radius: 10,
             weight: 2, // Sınır kalınlığı
             opacity: 0.9,
             fillColor: '#df8e00',
             fillOpacity: 0.75, // İç opaklık
-        }, '', false, 1, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
+        }, '', false, 50, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
         // Add more layers as needed
 
-    var layerProperties = {
+var layerProperties = {
     "İl": "il_adi",
     "İlçe": "County",
-    "Milli Mücadele Tarihi - Mekanlar": "Tarih"
+    "Milli Mücadele Tarihi - Mekanlar": "Tarih",
+    "Milli Mücadele Tarihi - Genel Anlatım (Konumu Belli Olmayan Sözlü Tarih)": "Tarih",
+    "Milli Mücadele Tarihi - Genel Anlatım (Konumu Belli Olmayan Sözlü Tarih)": "Tarih",
+    "Tarih Gezi Rotası Önerisi (Tarih Gezi Rotası Öneri Sayısı Artacak)": "Tarih"
 };
 
         // Katman seçici popup ve katman bilgilerini göstermek için olay dinleyicisi
-        map.on('click', function(e) {
-        var layers = [];
-        var clickPoint = [e.latlng.lng, e.latlng.lat];
-        var pixelPoint = map.latLngToContainerPoint(e.latlng);
-    
-        map.eachLayer(function(layer) {
-            if (layer instanceof L.GeoJSON) {
-                layer.eachLayer(function(feature) {
-                    if (feature.feature && feature.feature.geometry) {
-                        var isInside = false;
-    
-                        if (feature.feature.geometry.type === 'Polygon' || feature.feature.geometry.type === 'MultiPolygon') {
-                            isInside = turf.booleanPointInPolygon(turf.point(clickPoint), feature.feature);
-                        } else if (feature.feature.geometry.type === 'Point') {
-                            var featureLatLng = L.latLng(feature.feature.geometry.coordinates[1], feature.feature.geometry.coordinates[0]);
-                            var featurePixelPoint = map.latLngToContainerPoint(featureLatLng);
-                            var distance = pixelPoint.distanceTo(featurePixelPoint);
-                            isInside = distance <= 5;
-                        }
-    
-                        if (isInside) {
-                            var layerName = getLayerName(layer);
-                            var layerData = geoJSONLayers[layerName];
-                            if (layerData && layerData.options.enablePopup) {
-                                var propertyName = layerProperties[layerName];
-                                var displayName = propertyName ? feature.feature.properties[propertyName] : layerName;
-                                layers.push({
-                                    name: layerName,
-                                    displayName: displayName,
-                                    feature: feature.feature,
-                                    popupContent: layerData.options.popupContent
-                                });
-                            }
+    map.on('click', function(e) {
+    var layers = [];
+    var clickPoint = [e.latlng.lng, e.latlng.lat];
+    var pixelPoint = map.latLngToContainerPoint(e.latlng);
+
+    for (var group in geoJSONLayers) {
+        for (var layerName in geoJSONLayers[group]) {
+            var layer = geoJSONLayers[group][layerName];
+            layer.eachLayer(function(feature) {
+                if (feature.feature && feature.feature.geometry) {
+                    var isInside = false;
+
+                    if (feature.feature.geometry.type === 'Polygon' || feature.feature.geometry.type === 'MultiPolygon') {
+                        isInside = turf.booleanPointInPolygon(turf.point(clickPoint), feature.feature);
+                    } else if (feature.feature.geometry.type === 'Point') {
+                        var featureLatLng = L.latLng(feature.feature.geometry.coordinates[1], feature.feature.geometry.coordinates[0]);
+                        var featurePixelPoint = map.latLngToContainerPoint(featureLatLng);
+                        var distance = pixelPoint.distanceTo(featurePixelPoint);
+                        isInside = distance <= 5;
+                    }
+
+                    if (isInside) {
+                        var layerData = geoJSONLayers[group][layerName];
+                        if (layerData && layerData.options.enablePopup) {
+                            var propertyName = layerProperties[layerName];
+                            var displayName = propertyName ? feature.feature.properties[propertyName] : layerName;
+                            layers.push({
+                                name: layerName,
+                                displayName: displayName,
+                                feature: feature.feature,
+                                popupContent: layerData.options.popupContent
+                            });
                         }
                     }
-                });
-            }
-        });
-    
-        if (layers.length > 0) {
-            var popupContent = '<div class="layer-selector">';
-            popupContent += '<h3>Tarihler:</h3>';
-            layers.forEach(function(layer, index) {
-                popupContent += '<button onclick="showLayerInfo(' + index + ')">' + layer.displayName + '</button>';
+                }
             });
-            popupContent += '</div>';
-            popupContent += '<div id="layer-info" class="layer-info"></div>';
-    
-            var popup = L.popup()
-                .setLatLng(e.latlng)
-                .setContent(popupContent)
-                .openOn(map);
-    
-            window.popupLayers = layers;
         }
-    });
+    }
+
+    if (layers.length > 0) {
+        var popupContent = '<div class="layer-selector">';
+        popupContent += '<h3>Tarihler:</h3>';
+        layers.forEach(function(layer, index) {
+            popupContent += '<button onclick="showLayerInfo(' + index + ')">' + layer.displayName + '</button>';
+        });
+        popupContent += '</div>';
+        popupContent += '<div id="layer-info" class="layer-info"></div>';
+
+        var popup = L.popup()
+            .setLatLng(e.latlng)
+            .setContent(popupContent)
+            .openOn(map);
+
+        window.popupLayers = layers;
+    }
+});
         
         // Seçilen katman hakkında bilgi gösteren işlev
 function showLayerInfo(index) {
@@ -560,17 +567,20 @@ function showLayerInfo(index) {
         };
         var overlayMaps = {};
 
-        function updateLayerControl() {
-            if (map.layerControl) {
-                map.removeControl(map.layerControl);
-            }
-            for (var key in geoJSONLayers) {
-                if (geoJSONLayers[key]) {
-                    overlayMaps[key] = geoJSONLayers[key];
-                }
-            }
-            map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: false}).addTo(map);
+function updateLayerControl() {
+    if (map.layerControl) {
+        map.removeControl(map.layerControl);
+    }
+    var overlayMaps = {};
+    for (var group in geoJSONLayers) {
+        var groupLayers = {};
+        for (var name in geoJSONLayers[group]) {
+            groupLayers[name] = geoJSONLayers[group][name];
         }
+        overlayMaps[group] = L.layerGroup(Object.values(groupLayers));
+    }
+    map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: false}).addTo(map);
+}
 
         // Legend control
         var legend = L.control({position: 'bottomright'});
@@ -583,53 +593,42 @@ function showLayerInfo(index) {
 
         legend.addTo(map);
 
-        function updateLegend() {
+function updateLegend() {
     var legendDiv = document.querySelector('.legend');
     legendDiv.innerHTML = '<h4>Lejant</h4>';
-    map.eachLayer(function(layer) {
-    console.log(layer.options.zIndex); // Z-Index değerlerini kontrol eder
-
-    if (layer instanceof L.GeoJSON) {
-        var layerName = getLayerName(layer);
-        if (layerName) {
-            var style = layer.options.style;
-            var color = typeof style === 'function' ? style().color : style.color;
-            var fillColor = typeof style === 'function' ? style().fillColor : style.fillColor;
-            var weight = typeof style === 'function' ? style().weight : style.weight;
-            var dashArray = typeof style === 'function' ? style().dashArray : style.dashArray;
-            var fillOpacity = typeof style === 'function' ? style().fillOpacity : style.fillOpacity;
+    
+    for (var group in geoJSONLayers) {
+        var groupDiv = document.createElement('div');
+        groupDiv.innerHTML = `<strong>${group}</strong>`;
+        legendDiv.appendChild(groupDiv);
+        
+        for (var layerName in geoJSONLayers[group]) {
+            var layer = geoJSONLayers[group][layerName];
+            var style = layer.options.style || {};
+            if (typeof style === 'function') {
+                style = style();
+            }
+            
+            var color = style.color || '#000000';
+            var fillColor = style.fillColor || 'transparent';
+            var weight = style.weight || 1;
+            var dashArray = style.dashArray || '';
+            var fillOpacity = style.fillOpacity || 0;
 
             var legendItem = document.createElement('div');
             legendItem.style.marginBottom = '5px';
+            legendItem.style.marginLeft = '10px';
 
-            if (fillColor && fillOpacity !== undefined) {
-                legendItem.innerHTML = `
-                    <svg width="20" height="20" style="vertical-align: middle;">
-                        <rect width="20" height="20" fill="${fillColor}" stroke="${color}" stroke-width="${weight}" stroke-dasharray="${dashArray}" fill-opacity="${fillOpacity}"/>
-                    </svg>
-                    <span style="margin-left: 5px;">${layerName}</span>
-                `;
-            } else if (weight > 0 && fillColor === 'transparent') {
-                legendItem.innerHTML = `
-                    <svg width="20" height="20" style="vertical-align: middle;">
-                        <rect width="20" height="20" fill="none" stroke="${color}" stroke-width="${weight}" stroke-dasharray="${dashArray}"/>
-                    </svg>
-                    <span style="margin-left: 5px;">${layerName}</span>
-                `;
-            } else if (fillColor === 'transparent' && weight === 0) {
-                legendItem.innerHTML = `
-                    <svg width="20" height="20" style="vertical-align: middle;">
-                        <rect width="20" height="20" fill="${fillColor}" fill-opacity="${fillOpacity}"/>
-                    </svg>
-                    <span style="margin-left: 5px;">${layerName}</span>
-                `;
-            }
+            legendItem.innerHTML = `
+                <svg width="20" height="20" style="vertical-align: middle;">
+                    <rect width="20" height="20" fill="${fillColor}" stroke="${color}" stroke-width="${weight}" stroke-dasharray="${dashArray}" fill-opacity="${fillOpacity}"/>
+                </svg>
+                <span style="margin-left: 5px;">${layerName}</span>
+            `;
 
             legendDiv.appendChild(legendItem);
         }
     }
-});
-
 }
 
         function getLayerName(layer) {
@@ -708,6 +707,13 @@ function showLayerInfo(index) {
         
         // Add the fullscreen control to the map
         map.addControl(fullscreenControl);
+        map.on('layeradd layerremove', function() {
+    updateLegend();
+});
+
+// İlk yüklemede lejantı oluştur
+updateLegend();
+
     </script>
 </body>
 </html>
