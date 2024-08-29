@@ -159,7 +159,7 @@
         .Logo {
             justify-content: ;
             align-items: ;
-            height: 80px;
+            height: 50px;
         }
         .Side-Bar {
             max-height: 30vh;
@@ -168,11 +168,38 @@
         .map-container {
             height: calc(70vh - 80px);
         }
+        .legend, .leaflet-control-layers, .leaflet-control-minimap {
+        max-height: 30vh;
+        overflow-y: auto;
+        background-color: rgba(255, 255, 255, 0.8);
+        transition: max-height 0.3s ease-out;
+    }
+    .legend.collapsed, .leaflet-control-layers.collapsed, .leaflet-control-minimap.collapsed {
+        max-height: 40px;
+        overflow: hidden;
+    }
+
+.toggle-button {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    z-index: 1000;
+    background-color: #ffffff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0.5, 0.5, 0.5, 0.5);
+    max-width: 150px; /* Add this line */
+}
+
+    #city-manager {
+        display: none; /* Mobil cihazlarda şehir yöneticiyi gizle */
     }
     
     .layer-selector {
-        max-height: 200px;
-        overflow-y: auto;
+    max-height: 200px;
+    overflow-y: auto;
     }
     .layer-selector button {
         display: block;
@@ -186,14 +213,20 @@
     }
     .layer-selector button:hover {
         background-color: #f0f0f0
-        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19); 
-        border: 2px solid #9e9e9e;
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19); 
+            border: 2px solid #9e9e9e;
+        }
+        .layer-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+        }
+        
+        
     }
-    .layer-info {
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid #ccc;
-    }
+    
+
+    
     /* Popup genişliği için özel bir stil ekleyin */
     .leaflet-popup-content-wrapper {
         width: 500px !important; /* Burada genişliği ihtiyacınıza göre ayarlayabilirsiniz */
@@ -218,6 +251,43 @@
         padding-right: 10px;
         overflow-y: scroll;
 }
+
+    /* Toggle button style */
+.toggle-button {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    z-index: 1000;
+    background-color: #f4f4f4;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Panel style */
+.panel {
+    position: absolute;
+    bottom: 50px; /* Alt boşluk */
+    right: 10px;  /* Sağ boşluk */
+    z-index: 999;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: none; /* Panel başlangıçta gizli */
+}
+
+/* Panel açıkken görünen stil */
+.panel.open {
+    display: block;
+}
+
+
     
 }
 
@@ -267,6 +337,7 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
                     <!-- "Şehir seçiniz" option will be shown by default -->
                 </select>
             </div>
+            
         </div>
     </div>
     <!-- Leaflet JS -->
@@ -579,56 +650,49 @@ function updateLayerControl() {
         }
         overlayMaps[group] = L.layerGroup(Object.values(groupLayers));
     }
-    map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: false}).addTo(map);
+    map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: true}).addTo(map);
 }
 
-        // Legend control
-        var legend = L.control({position: 'bottomright'});
-
-        legend.onAdd = function(map) {
-            var div = L.DomUtil.create('div', 'legend');
-            div.innerHTML = '<h4>Lejant</h4>';
-            return div;
-        };
-
-        legend.addTo(map);
 
 function updateLegend() {
-    var legendDiv = document.querySelector('.legend');
-    legendDiv.innerHTML = '<h4>Lejant</h4>';
-    
+    var legendContent = '<h3>Lejant</h3>';
+
     for (var group in geoJSONLayers) {
-        var groupDiv = document.createElement('div');
-        groupDiv.innerHTML = `<strong>${group}</strong>`;
-        legendDiv.appendChild(groupDiv);
-        
+        var groupHasVisibleLayers = false;
+        var groupContent = `<strong>${group}</strong>`;
+
         for (var layerName in geoJSONLayers[group]) {
             var layer = geoJSONLayers[group][layerName];
-            var style = layer.options.style || {};
-            if (typeof style === 'function') {
-                style = style();
+            if (map.hasLayer(layer)) {
+                groupHasVisibleLayers = true;
+                var style = layer.options.style || {};
+                if (typeof style === 'function') {
+                    style = style();
+                }
+
+                var color = style.color || '#000000';
+                var fillColor = style.fillColor || 'transparent';
+                var weight = style.weight || 1;
+                var dashArray = style.dashArray || '';
+                var fillOpacity = style.fillOpacity || 0;
+
+                groupContent += `
+                    <div style="margin-bottom: 5px; margin-left: 10px;">
+                        <svg width="20" height="20" style="vertical-align: middle;">
+                            <rect width="20" height="20" fill="${fillColor}" stroke="${color}" stroke-width="${weight}" stroke-dasharray="${dashArray}" fill-opacity="${fillOpacity}"/>
+                        </svg>
+                        <span style="margin-left: 5px;">${layerName}</span>
+                    </div>
+                `;
             }
-            
-            var color = style.color || '#000000';
-            var fillColor = style.fillColor || 'transparent';
-            var weight = style.weight || 1;
-            var dashArray = style.dashArray || '';
-            var fillOpacity = style.fillOpacity || 0;
+        }
 
-            var legendItem = document.createElement('div');
-            legendItem.style.marginBottom = '5px';
-            legendItem.style.marginLeft = '10px';
-
-            legendItem.innerHTML = `
-                <svg width="20" height="20" style="vertical-align: middle;">
-                    <rect width="20" height="20" fill="${fillColor}" stroke="${color}" stroke-width="${weight}" stroke-dasharray="${dashArray}" fill-opacity="${fillOpacity}"/>
-                </svg>
-                <span style="margin-left: 5px;">${layerName}</span>
-            `;
-
-            legendDiv.appendChild(legendItem);
+        if (groupHasVisibleLayers) {
+            legendContent += groupContent;
         }
     }
+
+    return legendContent;
 }
 
         function getLayerName(layer) {
@@ -640,13 +704,9 @@ function updateLegend() {
             return null;
         }
 
-        map.on('overlayadd', function() {
-            updateLegend();
-        });
-
-        map.on('overlayremove', function() {
-            updateLegend();
-        });
+map.on('overlayadd overlayremove', function() {
+    updatePanelContent();
+});
 
         // Mini Map
         var miniMapLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png', {
@@ -656,7 +716,7 @@ function updateLegend() {
 
         new L.Control.MiniMap(miniMapLayer, {
             toggleDisplay: true,
-            minimized: false,
+            minimized: true,
             position: 'bottomleft'
         }).addTo(map);
 
@@ -711,8 +771,61 @@ function updateLegend() {
     updateLegend();
 });
 
-// İlk yüklemede lejantı oluştur
-updateLegend();
+// Toggle button and panel functionality
+var toggleButton = document.createElement('button');
+toggleButton.className = 'toggle-button';
+toggleButton.innerHTML = 'Lejant Aç/Kapat';
+document.body.appendChild(toggleButton);
+
+var panel = document.createElement('div');
+panel.className = 'panel';
+panel.innerHTML = '<div id="legend-container"></div>';
+document.body.appendChild(panel);
+
+function updatePanelContent() {
+    var legendContainer = document.getElementById('legend-container');
+    if (legendContainer) {
+        legendContainer.innerHTML = updateLegend();
+    }
+}
+
+// İlk yüklemede paneli güncelle
+updatePanelContent();
+
+toggleButton.addEventListener('click', function() {
+    panel.classList.toggle('open');
+});
+
+// Katman eklendiğinde veya kaldırıldığında paneli güncelle
+map.on('layeradd layerremove', updatePanelContent);
+
+
+function makeCollapsible(controlElement, buttonText) {
+    if (window.innerWidth <= 768) {
+        var toggleButton = document.createElement('button');
+        toggleButton.innerHTML = buttonText;
+        toggleButton.className = 'toggle-button';
+        controlElement.insertBefore(toggleButton, controlElement.firstChild);
+
+        toggleButton.addEventListener('click', function() {
+            controlElement.classList.toggle('collapsed');
+            toggleButton.innerHTML = controlElement.classList.contains('collapsed') ? 'Göster' : 'Gizle';
+        });
+
+        // Başlangıçta küçült
+        controlElement.classList.add('collapsed');
+    }
+}
+
+// Harita yüklendikten sonra bu fonksiyonu çağırın
+map.on('load', function() {
+    makeCollapsible(document.querySelector('.legend'), 'Lejant');
+    makeCollapsible(document.querySelector('.leaflet-control-layers'), 'Katmanlar');
+    makeCollapsible(document.querySelector('.leaflet-control-minimap'), 'Mini Harita');
+});
+
+// İlk yüklemede paneli güncelle
+updatePanelContent();
 
     </script>
 </body>
