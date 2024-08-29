@@ -657,7 +657,7 @@ function updateLayerControl() {
 
 
 function updateLegend() {
-    var legendContent = '<h3>Lejant</h3>';
+    var legendContent = '<h4>Lejant</h4>';
 
     for (var group in geoJSONLayers) {
         var groupHasVisibleLayers = false;
@@ -776,7 +776,7 @@ map.on('overlayadd overlayremove', function() {
 // Toggle button and panel functionality
 var toggleButton = document.createElement('button');
 toggleButton.className = 'toggle-button';
-toggleButton.innerHTML = 'Lejant Aç/Kapat';
+toggleButton.innerHTML = 'Lejant';
 document.body.appendChild(toggleButton);
 
 var panel = document.createElement('div');
@@ -796,6 +796,7 @@ updatePanelContent();
 
 toggleButton.addEventListener('click', function() {
     panel.classList.toggle('open');
+    toggleButton.innerHTML = panel.classList.contains('open') ? 'Lejant Kapat' : 'Lejant Aç';
 });
 
 // Katman eklendiğinde veya kaldırıldığında paneli güncelle
