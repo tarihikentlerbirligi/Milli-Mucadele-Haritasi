@@ -165,7 +165,7 @@
         .Side-Bar {
             max-height: 30vh;
             overflow-y: auto;
-            padding: 0px;
+            padding: 15px;
         }
         .map-container {
             height: calc(70vh - 80px);
@@ -229,31 +229,32 @@
     
     /* Popup genişliği için özel bir stil ekleyin */
     .leaflet-popup-content-wrapper {
-        width: 500px !important; /* Burada genişliği ihtiyacınıza göre ayarlayabilirsiniz */
-        max-height: 350px; /* İhtiyaca göre yüksekliği ayarlayın */
-        max-width: 90vw; /* Ekran boyutuna göre maksimum genişlik */
-        font-size: 12px; /* Font boyutunu da özelleştirebilirsiniz. */
-        text-align: left; /* İçeriği ortalayın */
+    width: 500px !important; /* Burada genişliği ihtiyacınıza göre ayarlayabilirsiniz */
+    max-height: 350px; /* İhtiyaca göre yüksekliği ayarlayın */
+    max-width: 90vw; /* Ekran boyutuna göre maksimum genişlik */
+    font-size: 12px; /* Font boyutunu da özelleştirebilirsiniz. */
+    text-align: left; /* İçeriği ortalayın */
     }
     
-.leaflet-popup-content img {
-    max-width: 100%;
+    .leaflet-popup-content img {
+    max-width: 450px !important;
     height: auto;
     display: block;
-    margin: 10px 0;
+    margin: 0px 0;
 }
 
     
     .leaflet-popup-content {
-        max-height: 330px; /* İhtiyaca göre yüksekliği ayarlayın */
-        width: 470px !important;
-        height: 330px;
-        padding-right: 10px;
-        overflow-y: scroll;
+    max-height: 330px; /* İhtiyaca göre yüksekliği ayarlayın */
+    width: 90vw !important;
+    max-width: 450px !important;
+    height: 330px;
+    padding-right: 10px;
+    overflow-y: scroll;
 }
 
     /* Toggle button style */
-.toggle-button {
+    .toggle-button {
     position: absolute;
     bottom: 20px;
     right: 10px;
@@ -508,7 +509,7 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
             opacity: 0.9,
             fillColor: '#c90f02',
             fillOpacity: 0.75, // İç opaklık
-        }, '', false, 101, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
+        }, '', false, 101, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:90hv;height:auto;'>");
 
         var milliMucadeleAnlatim = loadGeoJSONLayer("Milli Mücadele Tarihi", "Milli Mücadele Tarihi - Genel Anlatım (Konumu Belli Olmayan Sözlü Tarih)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-0.geojson", {
             color: '#ffffff', // Dış sınır rengi
@@ -517,7 +518,7 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
             opacity: 0.9,
             fillColor: '#828282',
             fillOpacity: 0.75, // İç opaklık
-        }, '', false, 100, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
+        }, '', false, 100, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:90hv;height:auto;'>");
 
         var milliMucadeleGezi = loadGeoJSONLayer("Haymana - Polatlı Rotası", "Tarih Gezi Rotası Önerisi (Tarih Gezi Rotası Öneri Sayısı Artacak)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-2.geojson", {
             color: '#ffffff', // Dış sınır rengi
@@ -526,7 +527,7 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
             opacity: 0.9,
             fillColor: '#df8e00',
             fillOpacity: 0.75, // İç opaklık
-        }, '', false, 50, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:100%;height:auto;'>");
+        }, '', false, 50, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:90hv;height:auto;'>");
         // Add more layers as needed
 
 var layerProperties = {
