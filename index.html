@@ -487,7 +487,7 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
         fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
         }, '-', false, 400, false, "");
 
-        var rotabir = loadGeoJSONLayer("Haymana - Polatlı Rotası","Tarih Gezi Rotası Önerisi 1", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/Rota%201_4326_2.geojson", {
+        var rotabir = loadGeoJSONLayer("Tarihi Gezi Rotaları","Haymana - Polatlı Rotası / Konum", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/29082024/milli_mucadele_29082024_v1-2-1.geojson", {
         color: 'white', // Dış sınır rengi
         weight: 0.5, // Sınır kalınlığı
         dashArray: '', // Kısa çizgiler
@@ -495,6 +495,33 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
         fillColor: '#ab6000', // İç renk, 'transparent' olarak ayarlandı
         fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
         }, '-', false, 50, false, "");
+
+        var milliMucadeleGezi = loadGeoJSONLayer("Tarihi Gezi Rotaları", "Haymana - Polatlı Rotası / Güzergah", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-2.geojson", {
+        color: '#ffffff', // Dış sınır rengi
+        radius: 10,
+        weight: 2, // Sınır kalınlığı
+        opacity: 0.9,
+        fillColor: '#df8e00',
+        fillOpacity: 0.75, // İç opaklık
+        }, '', false, 50, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:90hv;height:auto;'>");
+
+           var rotabir = loadGeoJSONLayer("Tarihi Gezi Rotaları","Afyon Kocatepe - Büyük Taarruz Rotası / Konum", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/29082024/milli_mucadele_29082024_v1-2-2.geojson", {
+        color: 'white', // Dış sınır rengi
+        weight: 0.5, // Sınır kalınlığı
+        dashArray: '', // Kısa çizgiler
+        opacity: 0.45,
+        fillColor: '#ab6000', // İç renk, 'transparent' olarak ayarlandı
+        fillOpacity: 0.75, // İç opaklık, görünmemesi için 0
+        }, '-', false, 50, false, "");
+
+        var milliMucadeleGezi = loadGeoJSONLayer("Tarihi Gezi Rotaları", "Afyon Kocatepe - Büyük Taarruz Rotası / Güzergah", "xxx", {
+        color: '#ffffff', // Dış sınır rengi
+        radius: 10,
+        weight: 2, // Sınır kalınlığı
+        opacity: 0.9,
+        fillColor: '#df8e00',
+        fillOpacity: 0.75, // İç opaklık
+        }, '', false, 50, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:90hv;height:auto;'>");
 
         var milliMucadele = loadGeoJSONLayer("Milli Mücadele Tarihi", "Milli Mücadele Tarihi - Mekanlar", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/e3054f5baa15a40084f15d8c52a2bbc79520b670/Geojson/milli_mucadele_28082024_v1-1.geojson", {
             color: '#ffffff', // Dış sınır rengi
@@ -513,15 +540,6 @@ Harita üzerindeki noktalardaki bilgilerle dönem fotoğrafları üç buçuk yı
             fillColor: '#828282',
             fillOpacity: 0.75, // İç opaklık
         }, '', false, 100, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:90hv;height:auto;'>");
-
-        var milliMucadeleGezi = loadGeoJSONLayer("Haymana - Polatlı Rotası", "Tarih Gezi Rotası Önerisi (Tarih Gezi Rotası Öneri Sayısı Artacak)", "https://raw.githubusercontent.com/tarihikentlerbirligi/Milli-Mucadele-Haritasi/main/Geojson/milli_mucadele_28082024_v1-2.geojson", {
-            color: '#ffffff', // Dış sınır rengi
-            radius: 10,
-            weight: 2, // Sınır kalınlığı
-            opacity: 0.9,
-            fillColor: '#df8e00',
-            fillOpacity: 0.75, // İç opaklık
-        }, '', false, 50, true, "<h2>{Mekan}</h2><p><strong>Tarih:</strong> {Tarih}</p><p>{Açıklama}</p><img src='{Gorsel}' style='max-width:90hv;height:auto;'>");
         // Add more layers as needed
 
 var layerProperties = {
