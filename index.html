@@ -11,7 +11,9 @@
     <!-- Leaflet MiniMap CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
     <!-- Open Sans Font -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" />
+    
+    
     <style>
     /* General style settings */
         body {
@@ -23,6 +25,7 @@
         overflow-x: hidden;
         font-family: 'Open Sans', sans-serif;
         }
+        
     /* Grid layout */
     .container {
         display: grid;
@@ -113,7 +116,7 @@
     font-size: 12px;
     padding: 1px 4px;
     white-space: nowrap;
-}
+    }
     
     /* City manager style */
     #city-manager {
@@ -136,16 +139,74 @@
         border: 1px solid #ccc;
         border-radius: 5px;
     }
-        .geojson-label {
-            background-color: transparent;
-            border: none;
-            box-shadow: none;
-            font-family: 'Open Sans', sans-serif;
-            font-weight: bold;
-            font-size: 10px;
-            color: red;
-            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+    .geojson-label {
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+        font-family: 'Open Sans', sans-serif;
+        font-weight: bold;
+        font-size: 10px;
+        color: red;
+        text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
+        
+    .leaflet-popup-content-wrapper {
+    width: 500px !important; /* Burada genişliği ihtiyacınıza göre ayarlayabilirsiniz */
+    max-width: 75vw; /* Ekran boyutuna göre maksimum genişlik */
+    max-height: 350px; /* İhtiyaca göre yüksekliği ayarlayın */
+    font-size: 12px; /* Font boyutunu da özelleştirebilirsiniz. */
+    text-align: left; /* İçeriği ortalayın */
+    }
+    
+    .leaflet-popup-content img {
+    width: 90% !important;
+    max-width: 50vw;
+    height: auto;
+    display: block;
+    margin: 0px 0;
+}
+    .leaflet-popup-content {
+    max-height: 330px; /* İhtiyaca göre yüksekliği ayarlayın */
+    width: 90% !important;
+    height: 330px;
+    padding-right: 10px;
+    overflow-y: scroll;
+}
+
+    /* Toggle button style */
+    .toggle-button {
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    z-index: 1000;
+    background-color: #f4f4f4;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Panel style */
+.panel {
+    position: absolute;
+    bottom: 50px; /* Alt boşluk */
+    right: 10px;  /* Sağ boşluk */
+    z-index: 999;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: none; /* Panel başlangıçta gizli */
+}
+
+/* Panel açıkken görünen stil */
+.panel.open {
+    display: block;
+}
 
         /* Media queries */
     @media (max-width: 768px) {
@@ -222,69 +283,8 @@
         border-top: 1px solid #ccc;
         }   
     }
-    
-    /* Popup genişliği için özel bir stil ekleyin */
-    .leaflet-popup-content-wrapper {
-    width: 500px !important; /* Burada genişliği ihtiyacınıza göre ayarlayabilirsiniz */
-    max-height: 350px; /* İhtiyaca göre yüksekliği ayarlayın */
-    max-width: 90vw; /* Ekran boyutuna göre maksimum genişlik */
-    font-size: 12px; /* Font boyutunu da özelleştirebilirsiniz. */
-    text-align: left; /* İçeriği ortalayın */
-    }
-    
-    .leaflet-popup-content img {
-    max-width: 450px !important;
-    height: auto;
-    display: block;
-    margin: 0px 0;
-}
-    .leaflet-popup-content {
-    max-height: 330px; /* İhtiyaca göre yüksekliği ayarlayın */
-    width: 90vw !important;
-    max-width: 450px !important;
-    height: 330px;
-    padding-right: 10px;
-    overflow-y: scroll;
-}
-
-    /* Toggle button style */
-    .toggle-button {
-    position: absolute;
-    bottom: 20px;
-    right: 10px;
-    z-index: 1000;
-    background-color: #f4f4f4;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Panel style */
-.panel {
-    position: absolute;
-    bottom: 50px; /* Alt boşluk */
-    right: 10px;  /* Sağ boşluk */
-    z-index: 999;
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    width: 300px;
-    max-height: 400px;
-    overflow-y: auto;
-    display: none; /* Panel başlangıçta gizli */
-}
-
-/* Panel açıkken görünen stil */
-.panel.open {
-    display: block;
-}
 
 
-    
-}
 
 </style>
 </head>
