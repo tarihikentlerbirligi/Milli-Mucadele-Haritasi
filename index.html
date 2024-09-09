@@ -594,7 +594,7 @@ var layerProperties = {
 
     if (layers.length > 0) {
         var popupContent = '<div class="layer-selector">';
-        popupContent += '<h3>Tarihler:</h3>';
+        popupContent += '<h3>Tarih Seçiniz</h3>';
         layers.forEach(function(layer, index) {
             popupContent += '<button onclick="showLayerInfo(' + index + ')">' + layer.displayName + '</button>';
         });
@@ -664,7 +664,7 @@ function updateLayerControl() {
         }
         overlayMaps[group] = L.layerGroup(Object.values(groupLayers));
     }
-    map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: true}).addTo(map);
+    map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: false}).addTo(map);
 }
 
 
@@ -814,30 +814,6 @@ toggleButton.addEventListener('click', function() {
 // Katman eklendiğinde veya kaldırıldığında paneli güncelle
 map.on('layeradd layerremove', updatePanelContent);
 
-
-function makeCollapsible(controlElement, buttonText) {
-    if (window.innerWidth <= 768) {
-        var toggleButton = document.createElement('button');
-        toggleButton.innerHTML = buttonText;
-        toggleButton.className = 'toggle-button';
-        controlElement.insertBefore(toggleButton, controlElement.firstChild);
-
-        toggleButton.addEventListener('click', function() {
-            controlElement.classList.toggle('collapsed');
-            toggleButton.innerHTML = controlElement.classList.contains('collapsed') ? 'Göster' : 'Gizle';
-        });
-
-        // Başlangıçta küçült
-        controlElement.classList.add('collapsed');
-    }
-}
-
-// Harita yüklendikten sonra bu fonksiyonu çağırın
-map.on('load', function() {
-    makeCollapsible(document.querySelector('.legend'), 'Lejant');
-    makeCollapsible(document.querySelector('.leaflet-control-layers'), 'Katmanlar');
-    makeCollapsible(document.querySelector('.leaflet-control-minimap'), 'Mini Harita');
-});
 
 // İlk yüklemede paneli güncelle
 updatePanelContent();
