@@ -72,11 +72,14 @@
         font-size: 14pt;
         margin: 0;
         text-align:center;
+        font-family: 'Open Sans', sans-serif;
     }
     .Side-Bar p {
         font-size: 10pt;
+        font-family: 'Open Sans', sans-serif;
         margin: 0;
         text-align: justify;
+
     }
     /* Map container style */
     .map-container {
@@ -103,7 +106,8 @@
     }
     .legend h4 {
         margin: 0 0 10px;
-        font-size: 14px;
+        font-size: 14pt;
+        font-family: 'Open Sans', sans-serif;
     }
     
     .geojson-label {
@@ -113,7 +117,7 @@
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     font-family: 'Open Sans', sans-serif;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 12pt;
     padding: 1px 4px;
     white-space: nowrap;
     }
@@ -132,6 +136,8 @@
     #city-manager label {
         font-weight: 600;
         font-size: 10pt;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 10pt; 
     }
     #city-manager select {
         width: 100%;
@@ -145,7 +151,7 @@
         box-shadow: none;
         font-family: 'Open Sans', sans-serif;
         font-weight: bold;
-        font-size: 10px;
+        font-size: 10pt;
         color: red;
         text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         }
@@ -154,7 +160,8 @@
     width: 500px !important; /* Burada genişliği ihtiyacınıza göre ayarlayabilirsiniz */
     max-width: 75vw; /* Ekran boyutuna göre maksimum genişlik */
     max-height: 350px; /* İhtiyaca göre yüksekliği ayarlayın */
-    font-size: 12px; /* Font boyutunu da özelleştirebilirsiniz. */
+    font-size: 10pt; /* Font boyutunu da özelleştirebilirsiniz. */
+    font-family: 'Open Sans', sans-serif;
     text-align: left; /* İçeriği ortalayın */
     }
     
@@ -184,6 +191,9 @@
     padding: 5px 10px;
     cursor: pointer;
     border-radius: 5px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 10pt; 
+    font-weight: bold;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -203,10 +213,30 @@
     display: none; /* Panel başlangıçta gizli */
 }
 
-/* Panel açıkken görünen stil */
-.panel.open {
-    display: block;
-}
+    /* Panel açıkken görünen stil */
+    .panel.open {
+        display: block;
+    }
+    
+    /* Katman kontrolünü flex düzeninde ortalamak için */
+    .layer-control-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Yatay olarak ortala */
+    }
+    
+    /* "Katman Seçiniz" yazısının stilleri */
+    .layer-control-title {
+        font-family: 'Open Sans', sans-serif;
+        font-weight: bold;
+        font-size: 10pt; 
+        padding: 10px;  /* Padding ekle */
+        background-color: #;  /* Arka plan rengi */
+        border-radius: 5px;  /* Köşeleri yuvarlat */
+        margin-top: 5px;  /* İkon ile yazı arasında boşluk */
+        text-align: center;  /* Yazıyı ortala */
+    }
+
 
         /* Media queries */
     @media (max-width: 768px) {
@@ -245,6 +275,9 @@
         .toggle-button {
         position: "bottomright";
         z-index: 1000;
+        font-size: 10pt; 
+        font-weight: bold;
+        font-family: 'Open Sans', sans-serif;
         background-color: #ffffff;
         border: none;
         padding: 5px 10px;
@@ -652,25 +685,58 @@ function showLayerInfo(index) {
         };
         var overlayMaps = {};
 
-function updateLayerControl() {
-    if (map.layerControl) {
-        map.removeControl(map.layerControl);
-    }
-    var overlayMaps = {};
-    for (var group in geoJSONLayers) {
-        var groupLayers = {};
-        for (var name in geoJSONLayers[group]) {
-            groupLayers[name] = geoJSONLayers[group][name];
+
+     function updateLayerControl() {
+        // Eğer layerControl haritada varsa, onu kaldır
+        if (map.layerControl) {
+            map.removeControl(map.layerControl);
         }
-        overlayMaps[group] = L.layerGroup(Object.values(groupLayers));
+    
+        var overlayMaps = {};
+        
+        // geoJSONLayers'daki grupları ve katmanları ayarla
+        for (var group in geoJSONLayers) {
+            var groupLayers = {};
+            for (var name in geoJSONLayers[group]) {
+                groupLayers[name] = geoJSONLayers[group][name];
+            }
+            overlayMaps[group] = L.layerGroup(Object.values(groupLayers));
+        }
+        
+        // Yeni katman kontrolü oluştur ve haritaya ekle
+        map.layerControl = L.control.layers(baseMaps, overlayMaps, {
+            position: 'topright',
+            collapsed: true  // Başlangıçta kapalı
+        }).addTo(map);
+    
+        // Katman kontrolü butonunun başlığına "Katman Seçiniz" metnini ekle
+        var controlElement = document.querySelector('.leaflet-control-layers');
+        if (controlElement) {
+            // "leaflet-control-layers" için flex düzenini ayarla
+            controlElement.classList.add('layer-control-container'); // Flex container için sınıf ekle
+    
+            // "Katman Seçiniz" başlığını oluştur
+            var titleElement = document.createElement('div');
+            titleElement.innerHTML = 'Katman<br>Seçiniz';  // "Katman" ve "Seçiniz" iki satırda
+            titleElement.classList.add('layer-control-title');  // Stil için sınıf ekle
+    
+            // Katman kontrolü butonunun başlık kısmını ekle
+            var toggleButton = controlElement.querySelector('.leaflet-control-layers-toggle');
+            if (toggleButton) {
+                // "Katman Seçiniz" yazısını ikonun altına ekle
+                toggleButton.parentNode.insertBefore(titleElement, toggleButton.nextSibling);
+            }
+    
+            controlElement.classList.remove('leaflet-control-layers-expanded');  // Kapalı olmasını sağla
+        }
     }
-    map.layerControl = L.control.layers(baseMaps, overlayMaps, {position: 'topright', collapsed: false}).addTo(map);
-}
+
+
+
 
 
 function updateLegend() {
     var legendContent = '<h4>Lejant</h4>';
-
     for (var group in geoJSONLayers) {
         var groupHasVisibleLayers = false;
         var groupContent = `<strong>${group}</strong>`;
@@ -738,10 +804,18 @@ map.on('overlayadd overlayremove', function() {
         var cities = {
             "Şehir seçiniz": {center: centerCoordinates, zoom: zoomLevel},
             "İstanbul": {center: [41.1150, 29.0726], zoom: 9},
+            "Samsun": {center: [41.28259607865268, 36.33576870111734], zoom: 10},
+            "Amasya": {center: [40.656805958752614, 35.835733269640855], zoom: 10},
+            "Tokat": {center: [40.31768027918776, 36.551412629653555], zoom: 10},
+            "Sivas": {center: [39.75106847019353, 37.01588852072349], zoom: 10},            
+            "Erzurum": {center: [39.90387649755475, 41.2713332443508], zoom: 9},
+            "Kayseri": {center: [38.725626003206166, 35.483433125253], zoom: 9},            
             "Ankara": {center: [39.9334, 32.8597], zoom: 8},
-            "İzmir": {center: [38.4192, 27.1287], zoom: 8},
-            "Antalya": {center: [36.8841, 30.7056], zoom: 8},
-            "Adana": {center: [37.0017, 35.3289], zoom: 8}
+            "Konya": {center: [37.872924176368954, 32.49455276699519], zoom: 9},
+            "Afyonkarahisar": {center: [38.757293802607876, 30.538866647188545], zoom: 9},
+            "Eskişehir": {center: [39.76905820999779, 30.519888972811113], zoom: 9},
+            "Uşak": {center: [38.67407274035929, 29.405829238364355], zoom: 9},      
+            "İzmir": {center: [38.4192, 27.1287], zoom: 8}
         };
 
         var citySelect = document.getElementById('cities');
